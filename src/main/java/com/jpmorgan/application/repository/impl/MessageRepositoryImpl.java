@@ -17,7 +17,7 @@ public class MessageRepositoryImpl implements MessageRepository{
      */
     @Override
     public void processMessage(Message message) {
-         dataStore.setMessages(message);
+         dataStore.addMessage(message);
     }
 
 }

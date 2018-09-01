@@ -24,6 +24,8 @@ $ git clone
 
 $ mvn install
 
+#Java version
+1.8 or above
 
 # Sample Message Types for Testing using Postman
 Message Type 1 : 
@@ -40,8 +42,8 @@ Message Type 2 :
     "noOfQuantity":2,
     "messageType":"MULTI_SELL_EVENT"
 }
-Message Type 3 :
- 
+
+Message Type 3 : 
 {
 	"productName":"Samsung",
     "messageType":"ADJUSTMENT_EVENT",
@@ -49,7 +51,7 @@ Message Type 3 :
     "operationType":"ADD"
 }
 
-#Rest Enpoint
+#Rest Endpoint
 http://localhost:9087/processor/processMessage/
 
 #Test classes

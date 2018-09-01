@@ -35,9 +35,6 @@ public class MessageProcessingControllerTest {
     MessageProcessingController messageProcessingController;
 
     @Autowired
-    MessageProcessor messageProcessor;
-
-    @Autowired
     ApplicationTracker application;
 
     @Autowired
@@ -123,10 +120,12 @@ public class MessageProcessingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
 
         assertEquals(Boolean.FALSE, application.isPaused());
-//        assertEquals(Boolean.TRUE, processor.getRecordedMessageCount() > 0);
+        assertEquals(" message count should not increase " +
+                "because application is not recording adjustment message count",
+                0, application.getRecordedMessageCount());
         assertEquals(3, dataStore.getMessages().size());
         assertEquals(BigDecimal.valueOf(1), dataStore.getMessages().get(0).getPriceBeforeAdjustment());
-        assertEquals("Adjustment : ADD amount 1 to all Samsung Product",BigDecimal.valueOf(2), dataStore.getMessages().get(0).getPrice());
+        assertEquals(" Adjustment : ADD amount 1 to all Samsung Product",BigDecimal.valueOf(2), dataStore.getMessages().get(0).getPrice());
         assertEquals("Samsung", dataStore.getMessages().get(0).getProductName());
     }
 
@@ -146,7 +145,7 @@ public class MessageProcessingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
 
         assertEquals(Boolean.FALSE, application.isPaused());
-  //      assertEquals(Boolean.TRUE, processor.getRecordedMessageCount() > 0);
+        assertEquals(0, application.getRecordedMessageCount());
         assertEquals(3, dataStore.getMessages().size());
         assertEquals(BigDecimal.valueOf(1), dataStore.getMessages().get(0).getPriceBeforeAdjustment());
         assertEquals("Adjustment : MULTIPLY amount 2 to all Samsung Product",BigDecimal.valueOf(2), dataStore.getMessages().get(0).getPrice());
@@ -169,7 +168,7 @@ public class MessageProcessingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
 
         assertEquals(Boolean.FALSE, application.isPaused());
-   //     assertEquals(Boolean.TRUE, processor.getRecordedMessageCount() > 0);
+        assertEquals(0, application.getRecordedMessageCount());
         assertEquals(3, dataStore.getMessages().size());
         assertEquals(BigDecimal.valueOf(1), dataStore.getMessages().get(0).getPriceBeforeAdjustment());
         assertEquals("Adjustment : SUBTRACT amount 2 to all Samsung Product",BigDecimal.valueOf(0), dataStore.getMessages().get(0).getPrice());
@@ -290,9 +289,9 @@ public class MessageProcessingControllerTest {
         thirdMultiEventMessage.setNoOfQuantity(2);
         thirdMultiEventMessage.setMessageType(MessageType.MULTI_SELL_EVENT);
 
-        dataStore.setMessages(firstSingleEventMessage);
-        dataStore.setMessages(secondSingleEventMessage);
-        dataStore.setMessages(thirdMultiEventMessage);
+        dataStore.addMessage(firstSingleEventMessage);
+        dataStore.addMessage(secondSingleEventMessage);
+        dataStore.addMessage(thirdMultiEventMessage);
 
     }
 

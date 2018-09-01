@@ -14,11 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * This class is starting point of application.
+ * External system will send messages on below mentioned rest end point.
+ * Later this class can be replaced by JMS listener class if required
+ */
+
 @RestController
 @RequestMapping("/processor")
 public class MessageProcessingController {
 
-    public static Logger logger = LogManager.getLogger(MessageProcessingController.class);
+    private static final Logger logger = LogManager.getLogger(MessageProcessingController.class);
 
     @Autowired
     private MessageProcessor messageProcessor;

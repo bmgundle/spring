@@ -2,7 +2,6 @@ package com.jpmorgan.application.helper.impl;
 
 import com.jpmorgan.application.helper.ReportGenerator;
 import com.jpmorgan.application.model.Message;
-import com.jpmorgan.application.processor.MessageProcessor;
 import com.jpmorgan.application.util.DataStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,17 +10,23 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+/**
+ * This class is responsible for generating reports
+ * and printing on console.
+ * Later output to console can be rplaced with file
+ *
+ */
+
 @Component
 public class ReportGeneratorImpl implements ReportGenerator {
 
     @Autowired
-    DataStore dataStore;
+    private DataStore dataStore;
 
-    @Autowired
-    MessageProcessor messageProcessor;
+    private static String REPORT_SEPRATOR_LINE = "--------------------------------------------------";
+    private static String TOTAL_SALE_REPORT_LABEL = "----------TOTAL SALE AMOUNT--------------{}";
 
-    public static Logger logger = LogManager.getLogger(ReportGeneratorImpl.class);
-
+    private static final Logger logger = LogManager.getLogger(ReportGeneratorImpl.class);
 
     /**
      * This method to print single and multi sale messages report
@@ -37,9 +42,9 @@ public class ReportGeneratorImpl implements ReportGenerator {
                 message.setProcessed(Boolean.TRUE);
             }
         }
-        logger.info("--------------------------------------------------");
-        logger.info("----------TOTAL SALE AMOUNT--------------{}", totalSale);
-        logger.info("--------------------------------------------------");
+        logger.info(REPORT_SEPRATOR_LINE);
+        logger.info(TOTAL_SALE_REPORT_LABEL, totalSale);
+        logger.info(REPORT_SEPRATOR_LINE);
     }
 
     /**
@@ -55,9 +60,9 @@ public class ReportGeneratorImpl implements ReportGenerator {
                 totalSale = totalSale.add(message.getPrice().multiply(BigDecimal.valueOf(message.getNoOfQuantity())));
 
         }
-        logger.info("--------------------------------------------------");
-        logger.info("----------TOTAL SALE AMOUNT--------------{}", totalSale);
-        logger.info("--------------------------------------------------");
+        logger.info(REPORT_SEPRATOR_LINE);
+        logger.info(TOTAL_SALE_REPORT_LABEL, totalSale);
+        logger.info(REPORT_SEPRATOR_LINE);
     }
 
     private String printSingleAndMultiSaleData(Message message) {

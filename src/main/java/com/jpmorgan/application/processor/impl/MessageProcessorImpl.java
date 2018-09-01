@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Service
 public class MessageProcessorImpl implements MessageProcessor {
 
-    public static Logger logger = LogManager.getLogger(MessageProcessorImpl.class);
+    static final Logger logger = LogManager.getLogger(MessageProcessorImpl.class);
 
     @Autowired
     private MessageRepositoryImpl messageRepositoryImpl;
@@ -44,64 +44,72 @@ public class MessageProcessorImpl implements MessageProcessor {
     public boolean processMessage(Message message) {
         logger.info("received message type {} for processing : {}", message.getMessageType());
 
-        //first validate the received message
+        //first validate the received message if is valid then only process otherwise return false
         if (validateMessage(message)){
 
-            //record the message
-
+            //check if message type is Adjustment then update store and return
             if (MessageType.ADJUSTMENT_EVENT.equals(message.getMessageType())) {
-                return updateStockPriceInDataStoreAsPerAdjustmentOperation(message);
+                return updateProductPricesInDataStore(message);
             }
+
+            //record the message
             applicationTracker.recordMessage();
+
             //proceed to store the message into data store
             messageRepositoryImpl.processMessage(message);
 
             //send for report printing method
             generateMessageReport();
+
             return Boolean.TRUE;
         }else{
             return Boolean.FALSE;
         }
     }
 
-    //TODO : Validation needs to be implemented based on MessageType
+    /**
+     * This method is responsible for validating incoming messages as per message type
+     * NOTE : Validation needs to be implemented based on MessageType
+     */
     private boolean validateMessage(Message message) {
         return Boolean.TRUE;
     }
 
     /**
-     * This method will update data store for existing stock
+     * Retrieve the messages from store and apply filter on product name
      */
-    private Boolean updateStockPriceInDataStoreAsPerAdjustmentOperation(Message currentMessage)
-    {
-        for(Message message: dataStore.getMessages()) {
+    private boolean updateProductPricesInDataStore(Message currentMessage){
+       dataStore.getMessages()
+               .stream()
+               .filter(message -> message.getProductName().equals(currentMessage.getProductName()))
+               .forEach(message -> updatePriceForExistingProductsIntoStore(message, currentMessage));
+       return Boolean.TRUE;
+    }
 
-            if(message.getProductName().equals(currentMessage.getProductName())){
+    /**
+     * Update price in store for filtered products in above method
+     */
+    private void updatePriceForExistingProductsIntoStore(Message messageFromStore, Message currentMessage){
 
-                message.setPriceBeforeAdjustment(message.getPrice());
-                message.setAdjustmentPrice(currentMessage.getAdjustmentPrice());
+        messageFromStore.setPriceBeforeAdjustment(messageFromStore.getPrice());
+        messageFromStore.setAdjustmentPrice(currentMessage.getAdjustmentPrice());
 
-                switch (currentMessage.getOperationType()) {
-                    case ADD:
-                        message.setPrice(message.getPrice().add(currentMessage.getAdjustmentPrice())
-                                .multiply(BigDecimal.valueOf(message.getNoOfQuantity())));
-                        break;
-                    case SUBTRACT:
-                        message.setPrice(message.getPrice().subtract(currentMessage.getAdjustmentPrice())
-                                .multiply(BigDecimal.valueOf(message.getNoOfQuantity())));
-                        break;
-                    case MULTIPLY:
-                        message.setPrice(message.getPrice().multiply(currentMessage.getAdjustmentPrice())
-                                .multiply(BigDecimal.valueOf(message.getNoOfQuantity())));
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-
+        switch (currentMessage.getOperationType()) {
+            case ADD:
+                messageFromStore.setPrice(messageFromStore.getPrice().add(currentMessage.getAdjustmentPrice())
+                        .multiply(BigDecimal.valueOf(messageFromStore.getNoOfQuantity())));
+                break;
+            case SUBTRACT:
+                messageFromStore.setPrice(messageFromStore.getPrice().subtract(currentMessage.getAdjustmentPrice())
+                        .multiply(BigDecimal.valueOf(messageFromStore.getNoOfQuantity())));
+                break;
+            case MULTIPLY:
+                messageFromStore.setPrice(messageFromStore.getPrice().multiply(currentMessage.getAdjustmentPrice())
+                        .multiply(BigDecimal.valueOf(messageFromStore.getNoOfQuantity())));
+                break;
+            default:
+                break;
         }
-        return Boolean.TRUE;
     }
 
     /**
@@ -122,7 +130,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     /**
      * This method displays application is paused Now on console
      */
-
     private void applicationNowPaused() {
         logger.info("===================================================");
         logger.info("==         The Application Is Now Paused         ==");

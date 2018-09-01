@@ -4,6 +4,7 @@ import com.jpmorgan.application.model.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,8 +14,11 @@ import java.util.List;
 @Component
 public class DataStore {
 
-    public List<Message> messages = new ArrayList<>();
+    private List<Message> messages = Collections.synchronizedList(new ArrayList<>());
 
+    /**
+     * This method return list of messages from store
+     */
     public List<Message> getMessages() {
         return messages;
     }
@@ -22,7 +26,7 @@ public class DataStore {
     /**
      * This method to store all the incoming messages into memory
      */
-    public void setMessages(Message messages) {
+    public void addMessage(Message messages) {
         this.messages.add(messages);
     }
 }

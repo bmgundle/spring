@@ -17,7 +17,7 @@ public class ApplicationTracker {
     /**
      * This method responsible for incrementing message count
      */
-    public void recordMessage(){
+    public synchronized void recordMessage(){
         messageReceived++;
     }
 
@@ -28,6 +28,9 @@ public class ApplicationTracker {
         return messageReceived;
     }
 
+    /**
+     * Set message count to Zero
+     */
     public void resetMessageCountToZeo() {
         this.messageReceived = 0;
     }
